@@ -318,35 +318,31 @@
         
         // Обновление информации о празднике
         async function updateHolidayInfo(date) {
-            const dateStr = date.toISOString().split('T')[0];
-            currentDateEl.textContent = formatDate(date);
-            
-            try {
-                const response = await fetch(`/api/holiday?date=${dateStr}`);
-                const data = await response.json();
-                
-                if (data.holiday) {
-                    holidayInfoEl.innerHTML = `
-                        <div class="holiday-name">🎉 ${data.holiday.name}</div>
-                        <div class="holiday-description">${data.holiday.description}</div>
-                    `;
-                } else {
-                    holidayInfoEl.innerHTML = `<div class="no-holiday">Праздников на эту дату нет</div>`;
-                }
-                
-                // Показываем кнопку "Сегодня", если дата не текущая
-                todayBtn.style.display = date.toDateString() !== new Date().toDateString() 
-                    ? "block" 
-                    : "none";
-                    
-                if (tg?.MainButton) {
-                    tg.MainButton.show();
-                }
-            } catch (error) {
-                console.error("Ошибка:", error);
-                holidayInfoEl.innerHTML = `<div class="no-holiday">Ошибка загрузки данных</div>`;
-            }
+    const dateStr = date.toISOString().split('T')[0];
+    currentDateEl.textContent = formatDate(date);
+
+    try {
+        const response = await fetch(`/api/holiday?date=${dateStr}`);
+        const data = await response.json();
+
+        if (data.holiday && data.holiday.name) {  // Проверяем наличие name
+            holidayInfoEl.innerHTML = `
+                <div class="holiday-name">🎉 ${data.holiday.name}</div>
+                ${data.holiday.description ?
+                    `<div class="holiday-description">${data.holiday.description}</div>` : ''}
+            `;
+        } else {
+            holidayInfoEl.innerHTML = `<div class="no-holiday">Праздников на эту дату нет</div>`;
         }
+
+        todayBtn.style.display = date.toDateString() !== new Date().toDateString()
+            ? "block"
+            : "none";
+    } catch (error) {
+        console.error("Ошибка:", error);
+        holidayInfoEl.innerHTML = `<div class="no-holiday">Ошибка загрузки данных</div>`;
+    }
+}
         
         // Инициализация календаря
         function initCalendar() {

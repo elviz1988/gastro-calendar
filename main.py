@@ -29,13 +29,30 @@ async def read_root():
 # API для получения праздника
 @app.get("/api/holiday")
 async def get_holiday(date: str):
-    month_day = date[5:10]  # Получаем "MM-DD"
-    conn = get_db()
-    cursor = conn.cursor()
-    cursor.execute("SELECT name, description FROM holidays WHERE date=?", (month_day,))
-    result = cursor.fetchone()
-    conn.close()
-    return {"holiday": result} if result else {"holiday": None}
+    try:
+        month_day = date[5:10]  # Получаем "MM-DD"
+        conn = get_db()
+        conn.row_factory = sqlite3.Row  # Важно: для доступа по именам колонок
+        cursor = conn.cursor()
+        cursor.execute(
+            "SELECT name, description FROM holidays WHERE date = ?",
+            (month_day,)
+        )
+        result = cursor.fetchone()
+        conn.close()
+
+        if result:
+            return {
+                "holiday": {
+                    "name": result["name"],
+                    "description": result["description"]
+                }
+            }
+        return {"holiday": None}
+
+    except Exception as e:
+        print(f"Ошибка при запросе к БД: {e}")
+        return {"holiday": None}
 
 # API для всех праздников
 @app.get("/api/all_holidays")
