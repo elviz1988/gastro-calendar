@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🍽️ Гастрономический календарь</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+        .date-display {
+            font-size: 24px;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .holiday-info {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            min-height: 60px;
+        }
+        .no-holiday {
+            color: #888;
+            font-style: italic;
+        }
+        .calendar-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 12px 20px;
+            background: #0088cc;
+            color: white;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 16px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+        .today-btn {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 12px 20px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 16px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            display: none;
+        }
+        #calendarModal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        .calendar-container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 400px;
+        }
+        .month-selector {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 8px;
+        }
+        .calendar-day {
+            padding: 10px;
+            text-align: center;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        .calendar-day.holiday {
+            background: #FFF9C4;
+            font-weight: bold;
+        }
+        .calendar-day:hover {
+            background: #f0f0f0;
+        }
+    </style>
+</head>
+<body>
+    <div class="date-display" id="currentDate"></div>
+    <div class="holiday-info no-holiday" id="holidayInfo">Загрузка...</div>
+    
+    <button class="calendar-btn" id="calendarBtn">📅 Календарь</button>
+    <button class="today-btn" id="todayBtn">Сегодня</button>
+    
+    <div id="calendarModal">
+        <div class="calendar-container">
+            <div class="month-selector">
+                <button id="prevMonth">←</button>
+                <h2 id="currentMonth"></h2>
+                <button id="nextMonth">→</button>
+            </div>
+            <div class="calendar-grid" id="calendarGrid"></div>
+        </div>
+    </div>
+
+    <script>
+        // Текущая дата
+        let currentDate = new Date();
+        let selectedDate = new Date();
+        
+        // Элементы DOM
+        const currentDateEl = document.getElementById("currentDate");
+        const holidayInfoEl = document.getElementById("holidayInfo");
+        const calendarBtn = document.getElementById("calendarBtn");
+        const todayBtn = document.getElementById("todayBtn");
+        const calendarModal = document.getElementById("calendarModal");
+        const currentMonthEl = document.getElementById("currentMonth");
+        const calendarGrid = document.getElementById("calendarGrid");
+        const prevMonthBtn = document.getElementById("prevMonth");
+        const nextMonthBtn = document.getElementById("nextMonth");
+        
+        // Форматирование даты
+        function formatDate(date) {
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            return date.toLocaleDateString('ru-RU', options);
+        }
+        
+        // Обновление интерфейса
+        async function updateUI(date) {
+            const dateStr = date.toISOString().split('T')[0];
+            currentDateEl.textContent = formatDate(date);
+            
+            const response = await fetch(`/api/holiday?date=${dateStr}`);
+            const { holiday } = await response.json();
+            
+            if (holiday) {
+                const [name, description] = holiday;
+                holidayInfoEl.innerHTML = `
+                    <strong>🎉 ${name}</strong><br>
+                    <small>${description}</small>
+                `;
+                holidayInfoEl.classList.remove("no-holiday");
+            } else {
+                holidayInfoEl.textContent = "Сегодня праздников нет";
+                holidayInfoEl.classList.add("no-holiday");
+            }
+            
+            todayBtn.style.display = date.toDateString() !== new Date().toDateString() 
+                ? "block" 
+                : "none";
+        }
+        
+        // Инициализация календаря
+        async function initCalendar() {
+            const response = await fetch("/api/all_holidays");
+            const holidays = await response.json();
+            
+            let currentMonth = new Date().getMonth();
+            let currentYear = new Date().getFullYear();
+            
+            function renderCalendar(month, year) {
+                currentMonthEl.textContent = new Date(year, month).toLocaleDateString('ru-RU', { 
+                    month: 'long', 
+                    year: 'numeric' 
+                });
+                calendarGrid.innerHTML = '';
+                
+                const firstDay = new Date(year, month, 1).getDay();
+                const daysInMonth = new Date(year, month + 1, 0).getDate();
+                
+                // Пустые ячейки для первого дня
+                for (let i = 0; i < firstDay; i++) {
+                    calendarGrid.appendChild(document.createElement("div"));
+                }
+                
+                // Дни месяца
+                for (let day = 1; day <= daysInMonth; day++) {
+                    const dayElement = document.createElement("div");
+                    dayElement.className = "calendar-day";
+                    dayElement.textContent = day;
+                    
+                    const monthStr = (month + 1).toString().padStart(2, '0');
+                    const dayStr = day.toString().padStart(2, '0');
+                    const dateKey = `${monthStr}-${dayStr}`;
+                    
+                    if (holidays[dateKey]) {
+                        dayElement.classList.add("holiday");
+                    }
+                    
+                    dayElement.addEventListener("click", () => {
+                        selectedDate = new Date(year, month, day);
+                        updateUI(selectedDate);
+                        calendarModal.style.display = "none";
+                    });
+                    
+                    calendarGrid.appendChild(dayElement);
+                }
+            }
+            
+            prevMonthBtn.addEventListener("click", () => {
+                currentMonth--;
+                if (currentMonth < 0) {
+                    currentMonth = 11;
+                    currentYear--;
+                }
+                renderCalendar(currentMonth, currentYear);
+            });
+            
+            nextMonthBtn.addEventListener("click", () => {
+                currentMonth++;
+                if (currentMonth > 11) {
+                    currentMonth = 0;
+                    currentYear++;
+                }
+                renderCalendar(currentMonth, currentYear);
+            });
+            
+            renderCalendar(currentMonth, currentYear);
+        }
+        
+        // Открытие/закрытие календаря
+        calendarBtn.addEventListener("click", () => {
+            calendarModal.style.display = "flex";
+        });
+        
+        calendarModal.addEventListener("click", (e) => {
+            if (e.target === calendarModal) {
+                calendarModal.style.display = "none";
+            }
+        });
+        
+        // Кнопка "Сегодня"
+        todayBtn.addEventListener("click", () => {
+            selectedDate = new Date();
+            updateUI(selectedDate);
+        });
+        
+        // Инициализация
+        document.addEventListener("DOMContentLoaded", () => {
+            updateUI(currentDate);
+            initCalendar();
+        });
+    </script>
+</body>
+</html>
