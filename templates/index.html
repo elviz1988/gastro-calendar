@@ -1,0 +1,23 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Гастрокалендарь</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <div class="container">
+    <h1>{{ date }}</h1>
+    {% if holidays %}
+      <ul>
+        {% for holiday in holidays %}
+          <li>{{ holiday }}</li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p>праздников нет</p>
+    {% endif %}
+    <a href="/calendar" class="fab">📅</a>
+  </div>
+</body>
+</html>
