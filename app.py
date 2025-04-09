@@ -3,8 +3,16 @@ from flask import Flask, render_template, request, redirect, url_for
 import sqlite3
 from datetime import datetime
 import calendar
+import locale
+
+locale.setlocale(locale.LC_TIME, 'ru_RU.UTF-8')
 
 app = Flask(__name__)
+
+@app.template_filter("format_date")
+def format_date_filter(value):
+    date = datetime.strptime(value, "%Y-%m-%d")
+    return date.strftime("%-d %B %Y")
 
 def get_holidays_for_date(date_str):
     conn = sqlite3.connect('holidays.db')
@@ -32,6 +40,12 @@ def index():
 def calendar_view():
     year = request.args.get("year", default=datetime.today().year, type=int)
     month = request.args.get("month", default=datetime.today().month, type=int)
+    if month < 1:
+        month = 12
+        year -= 1
+    elif month > 12:
+        month = 1
+        year += 1
 
     month_calendar = calendar.Calendar(firstweekday=0).monthdayscalendar(year, month)
     holiday_dates = get_all_holiday_dates()
