@@ -1,23 +1,46 @@
-
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
+  <meta charset="UTF-8">
   <title>Гастрокалендарь</title>
   <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-  <div class="container">
-    <h1>{{ date }}</h1>
-    {% if holidays %}
-      <ul>
-        {% for holiday in holidays %}
-          <li>{{ holiday }}</li>
-        {% endfor %}
-      </ul>
-    {% else %}
-      <p>праздников нет</p>
-    {% endif %}
-    <a href="/calendar" class="fab">📅</a>
+  <div id="loader">
+    <div class="logo">🍴</div>
+    <div class="progress-bar">
+      <div class="progress"></div>
+    </div>
   </div>
+
+  <div class="container hidden">
+    <header>
+      <h1>{{ date | format_date }}</h1>
+    </header>
+
+    <main>
+      {% if holidays %}
+        <div class="holiday-list">
+          {{ holidays | join(" · ") }}
+        </div>
+      {% else %}
+        <p class="no-holiday">🎈 Праздников нет</p>
+      {% endif %}
+    </main>
+
+    <footer>
+      <a href="/calendar" class="fab">📅</a>
+      <a href="/" class="today-btn">Сегодня</a>
+    </footer>
+  </div>
+
+  <script>
+    window.addEventListener("load", () => {
+      setTimeout(() => {
+        document.getElementById("loader").style.display = "none";
+        document.querySelector(".container").classList.remove("hidden");
+      }, 1000);
+    });
+  </script>
 </body>
 </html>
