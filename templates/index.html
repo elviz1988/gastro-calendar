@@ -5,35 +5,29 @@
   <title>Гастрокалендарь</title>
   <link rel="stylesheet" href="/static/style.css">
 </head>
-<body>
+<body style="background-image: url('https://images.unsplash.com/photo-1600891964599-f61ba0e24092?auto=format&fit=crop&w=1400&q=80'); background-size: cover;">
   <div id="loader">
     <div class="logo">🍴</div>
-    <div class="progress-bar">
-      <div class="progress"></div>
-    </div>
+    <div class="progress-bar"><div class="progress"></div></div>
   </div>
-
   <div class="container hidden">
     <header>
       <h1>{{ date | format_date }}</h1>
     </header>
-
     <main>
       {% if holidays %}
-        <div class="holiday-list">
-          {{ holidays | join(" · ") }}
-        </div>
+        <div class="holiday-list">{{ holidays | join(" · ") }}</div>
       {% else %}
         <p class="no-holiday">🎈 Праздников нет</p>
       {% endif %}
     </main>
-
     <footer>
-      <a href="/calendar" class="fab">📅</a>
+      {% if date != today %}
       <a href="/" class="today-btn">Сегодня</a>
+      {% endif %}
+      <a href="/calendar" class="fab">📅</a>
     </footer>
   </div>
-
   <script>
     window.addEventListener("load", () => {
       setTimeout(() => {

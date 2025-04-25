@@ -12,12 +12,9 @@
       <h2>{{ month_name }} {{ year }}</h2>
       <a href="/calendar?year={{ year }}&month={{ month + 1 }}" class="nav-btn">›</a>
     </header>
-
     <table class="calendar">
       <thead>
-        <tr>
-          <th>Пн</th><th>Вт</th><th>Ср</th><th>Чт</th><th>Пт</th><th>Сб</th><th>Вс</th>
-        </tr>
+        <tr><th>Пн</th><th>Вт</th><th>Ср</th><th>Чт</th><th>Пт</th><th>Сб</th><th>Вс</th></tr>
       </thead>
       <tbody>
         {% for week in month_calendar %}
@@ -25,23 +22,16 @@
             {% for day in week %}
               {% if day == 0 %}
                 <td></td>
+              {% elif day in marked_days %}
+                <td class="has-holiday"><a href="/date/{{ year }}-{{ "%02d"|format(month) }}-{{ "%02d"|format(day) }}">{{ day }}</a></td>
               {% else %}
-                {% if day in marked_days %}
-                  <td class="has-holiday">
-                    <a href="/date/{{ year }}-{{ "%02d"|format(month) }}-{{ "%02d"|format(day) }}">{{ day }}</a>
-                  </td>
-                {% else %}
-                  <td>
-                    <a href="/date/{{ year }}-{{ "%02d"|format(month) }}-{{ "%02d"|format(day) }}">{{ day }}</a>
-                  </td>
-                {% endif %}
+                <td><a href="/date/{{ year }}-{{ "%02d"|format(month) }}-{{ "%02d"|format(day) }}">{{ day }}</a></td>
               {% endif %}
             {% endfor %}
           </tr>
         {% endfor %}
       </tbody>
     </table>
-
     <footer>
       <a href="/" class="today-btn">Сегодня</a>
     </footer>
