@@ -18,23 +18,20 @@
       </thead>
       <tbody>
         {% for week in month_calendar %}
-          <tr>
-            {% for day in week %}
-              {% if day == 0 %}
-                <td></td>
-              {% elif day in marked_days %}
-                <td class="has-holiday"><a href="/date/{{ year }}-{{ "%02d"|format(month) }}-{{ "%02d"|format(day) }}">{{ day }}</a></td>
-              {% else %}
-                <td><a href="/date/{{ year }}-{{ "%02d"|format(month) }}-{{ "%02d"|format(day) }}">{{ day }}</a></td>
-              {% endif %}
-            {% endfor %}
-          </tr>
+        <tr>
+          {% for day in week %}
+            {% if day == 0 %}
+              <td></td>
+            {% elif day in marked_days %}
+              <td class="has-holiday"><a href="/date/{{ year }}-{{ "%02d"|format(month) }}-{{ "%02d"|format(day) }}">{{ day }}</a></td>
+            {% else %}
+              <td><a href="/date/{{ year }}-{{ "%02d"|format(month) }}-{{ "%02d"|format(day) }}">{{ day }}</a></td>
+            {% endif %}
+          {% endfor %}
+        </tr>
         {% endfor %}
       </tbody>
     </table>
-    <footer>
-      <a href="/" class="today-btn">Сегодня</a>
-    </footer>
   </div>
 </body>
 </html>
