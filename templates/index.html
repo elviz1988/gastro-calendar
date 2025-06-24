@@ -2,25 +2,23 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <title>Гастрокалендарь</title>
+  <title>Календарь праздников</title>
   <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
   <div class="container">
-    <header><h1>{{ date | format_date }}</h1></header>
-    <main>
-      {% if holidays %}
-        <div class="holiday-list">{{ holidays | join(" · ") }}</div>
-      {% else %}
-        <p class="no-holiday">🎈 Праздников нет</p>
-      {% endif %}
-    </main>
-    <footer>
-      {% if date != today %}
-        <a href="/" class="today-btn">Сегодня</a>
-      {% endif %}
-      <a href="/calendar" class="fab">📅</a>
-    </footer>
+    <h1>Гастрономический календарь</h1>
+    <p class="date">{{ date|format_date }}</p>
+    {% if holidays %}
+      <ul class="holidays">
+        {% for h in holidays %}
+          <li>{{ h }}</li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="no-holiday">Нет праздников</p>
+    {% endif %}
+    <a href="/calendar" class="calendar-button">Календарь</a>
   </div>
 </body>
 </html>
